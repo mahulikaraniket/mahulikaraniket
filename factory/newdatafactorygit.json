@@ -1,0 +1,9 @@
+{
+	"name": "newdatafactorygit",
+	"location": "eastus2",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "359192a0-0af0-43ea-b82f-1bb92ed1f4fd",
+		"tenantId": "300e0b09-c6c3-40cd-8253-99606f1d245e"
+	}
+}

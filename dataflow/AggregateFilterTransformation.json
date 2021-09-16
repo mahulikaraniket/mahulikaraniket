@@ -1,0 +1,35 @@
+{
+	"name": "AggregateFilterTransformation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "CountryLookupcsv",
+						"type": "DatasetReference"
+					},
+					"name": "CountryLookup"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AggFilterTransformation",
+						"type": "DatasetReference"
+					},
+					"name": "DeployingTransformedData"
+				}
+			],
+			"transformations": [
+				{
+					"name": "RemovingDuplicateRecords"
+				},
+				{
+					"name": "RemovingNulls"
+				}
+			],
+			"script": "source(output(\n\t\tcountry as string,\n\t\tcountry_code_2_digit as string,\n\t\tcountry_code_3_digit as string,\n\t\tcontinent as string,\n\t\tpopulation as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CountryLookup\nCountryLookup aggregate(groupBy(country,\n\t\tcountry_code_2_digit,\n\t\tcountry_code_3_digit,\n\t\tcontinent,\n\t\tpopulation),\n\teach(match(name!='country'&&name!='country_code_2_digit'&&name!='country_code_3_digit'&&name!='continent'&&name!='population'), $$ = first($$))) ~> RemovingDuplicateRecords\nRemovingDuplicateRecords filter(not(isNull(country) || isNull(country_code_2_digit) || isNull(country_code_3_digit) || isNull(continent) || isNull(population))) ~> RemovingNulls\nRemovingNulls sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['AggreagateFilterOutput'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> DeployingTransformedData"
+		}
+	}
+}
