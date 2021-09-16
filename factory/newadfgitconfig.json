@@ -1,0 +1,9 @@
+{
+	"name": "newadfgitconfig",
+	"location": "eastus2",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "970cbf1a-1948-444b-b982-632235c8c361",
+		"tenantId": "300e0b09-c6c3-40cd-8253-99606f1d245e"
+	}
+}
