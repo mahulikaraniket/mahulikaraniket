@@ -14,12 +14,24 @@
 			],
 			"sinks": [
 				{
+					"dataset": {
+						"referenceName": "ConditionalSplit",
+						"type": "DatasetReference"
+					},
 					"name": "LessPopulationDensity"
 				},
 				{
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
 					"name": "HighPopulationDensity"
 				},
 				{
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
 					"name": "ModeratePopulationDensity"
 				}
 			],
@@ -34,7 +46,7 @@
 					"name": "RemovingNulls"
 				}
 			],
-			"script": "source(output(\n\t\tcountry as string,\n\t\tcountry_code_2_digit as string,\n\t\tcountry_code_3_digit as string,\n\t\tcontinent as string,\n\t\tpopulation as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CountryLookup\nRemovingNulls split(population <= '1000' && population >= '200000',\n\tpopulation <= '200001' && population >= '1000000',\n\tpopulation >= '1000001',\n\tdisjoint: false) ~> ConditionalSplit@(LessPopulationDensity, ModeratePopulationDensity, HighPopulationDensity)\nCountryLookup aggregate(groupBy(country,\n\t\tcountry_code_2_digit,\n\t\tcountry_code_3_digit,\n\t\tcontinent,\n\t\tpopulation),\n\teach(match(name!='country'&&name!='country_code_2_digit'&&name!='country_code_3_digit'&&name!='continent'&&name!='population'), $$ = first($$))) ~> RemovingDuplicates\nRemovingDuplicates filter(not(isNull(country) || isNull(country_code_2_digit) || isNull(country_code_3_digit) || isNull(continent) || isNull(population))) ~> RemovingNulls\nConditionalSplit@LessPopulationDensity sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> LessPopulationDensity\nConditionalSplit@HighPopulationDensity sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> HighPopulationDensity\nConditionalSplit@ModeratePopulationDensity sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ModeratePopulationDensity"
+			"script": "source(output(\n\t\tcountry as string,\n\t\tcountry_code_2_digit as string,\n\t\tcountry_code_3_digit as string,\n\t\tcontinent as string,\n\t\tpopulation as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CountryLookup\nRemovingNulls split(population >= '200000',\n\tpopulation <= '200001' && population >= '1000000',\n\tpopulation >= '1000001',\n\tdisjoint: false) ~> ConditionalSplit@(LessPopulationDensity, ModeratePopulationDensity, HighPopulationDensity)\nCountryLookup aggregate(groupBy(country,\n\t\tcountry_code_2_digit,\n\t\tcountry_code_3_digit,\n\t\tcontinent,\n\t\tpopulation),\n\teach(match(name!='country'&&name!='country_code_2_digit'&&name!='country_code_3_digit'&&name!='continent'&&name!='population'), $$ = first($$))) ~> RemovingDuplicates\nRemovingDuplicates filter(not(isNull(country) || isNull(country_code_2_digit) || isNull(country_code_3_digit) || isNull(continent) || isNull(population))) ~> RemovingNulls\nConditionalSplit@LessPopulationDensity sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['LessPopulationDensity'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> LessPopulationDensity\nConditionalSplit@HighPopulationDensity sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['HighPopulationDensity'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> HighPopulationDensity\nConditionalSplit@ModeratePopulationDensity sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['ModeratePopulationDensity'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> ModeratePopulationDensity"
 		}
 	}
 }
