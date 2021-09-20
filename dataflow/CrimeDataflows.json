@@ -5,12 +5,46 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "CrimecsvInput",
+						"type": "DatasetReference"
+					},
 					"name": "Crimecsv"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
-			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> Crimecsv"
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "TransformedCrimeData",
+						"type": "DatasetReference"
+					},
+					"name": "TransformedData"
+				}
+			],
+			"transformations": [
+				{
+					"name": "RemovingDuplicate"
+				},
+				{
+					"name": "RemovingColumns"
+				},
+				{
+					"name": "RemovingNulls"
+				},
+				{
+					"name": "SortByYear"
+				},
+				{
+					"name": "CreatingIncidentID"
+				},
+				{
+					"name": "CreatingOffenceID"
+				},
+				{
+					"name": "CreatingLocationID"
+				}
+			],
+			"script": "source(output(\n\t\tINCIDENT_NUMBER as string,\n\t\tOFFENSE_CODE as string,\n\t\tOFFENSE_CODE_GROUP as string,\n\t\tOFFENSE_DESCRIPTION as string,\n\t\tDISTRICT as string,\n\t\tREPORTING_AREA as string,\n\t\tSHOOTING as string,\n\t\tOCCURRED_ON_DATE as string,\n\t\tYEAR as string,\n\t\tMONTH as string,\n\t\tDAY_OF_WEEK as string,\n\t\tHOUR as string,\n\t\tUCR_PART as string,\n\t\tSTREET as string,\n\t\tLat as string,\n\t\tLong as string,\n\t\tLocation as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Crimecsv\nRemovingColumns aggregate(groupBy(INCIDENT_NUMBER),\n\teach(match(name != 'INCIDENT_NUMBER'), $$ = first($$))) ~> RemovingDuplicate\nCrimecsv select(mapColumn(\n\t\tINCIDENT_NUMBER,\n\t\tOFFENSE_CODE,\n\t\tOFFENSE_CODE_GROUP,\n\t\tOFFENSE_DESCRIPTION,\n\t\tDISTRICT,\n\t\tOCCURRED_ON_DATE,\n\t\tYEAR,\n\t\tMONTH,\n\t\tDAY_OF_WEEK,\n\t\tHOUR,\n\t\tSTREET,\n\t\tLocation\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> RemovingColumns\nRemovingDuplicate filter(not(isNull(DISTRICT) || isNull(STREET))) ~> RemovingNulls\nRemovingNulls sort(asc(YEAR, true)) ~> SortByYear\nSortByYear keyGenerate(output(INCIDENT_NUMBER_ID as long),\n\tstartAt: 1L) ~> CreatingIncidentID\nCreatingIncidentID keyGenerate(output(OFFENCE_CODE_ID as long),\n\tstartAt: 10001L) ~> CreatingOffenceID\nCreatingOffenceID keyGenerate(output(Location_ID as long),\n\tstartAt: 100001L) ~> CreatingLocationID\nCreatingLocationID sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tcountry as string,\n\t\tcountry_code_2_digit as string,\n\t\tcountry_code_3_digit as string,\n\t\tcontinent as string,\n\t\tpopulation as string\n\t),\n\tpartitionFileNames:['TransformedCrimeData'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> TransformedData"
 		}
 	}
 }
