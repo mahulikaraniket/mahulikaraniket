@@ -1,0 +1,16 @@
+{
+	"name": "CrimeDataflows",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "Crimecsv"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> Crimecsv"
+		}
+	}
+}
