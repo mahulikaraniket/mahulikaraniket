@@ -1,0 +1,27 @@
+{
+	"name": "WindowTransformation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Empupdatescsv",
+						"type": "DatasetReference"
+					},
+					"name": "EmpUpdatescsv"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "ColumnRearrange"
+				},
+				{
+					"name": "WindowTransformation"
+				}
+			],
+			"script": "source(output(\n\t\tempid as string,\n\t\t{name } as string,\n\t\tcountry as string,\n\t\tdepartment as string,\n\t\tsalary as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> EmpUpdatescsv\nEmpUpdatescsv select(mapColumn(\n\t\tEmpid = empid,\n\t\t{Name } = {name },\n\t\tDepartment = department,\n\t\tSalary = salary,\n\t\tCountry = country\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ColumnRearrange\nColumnRearrange window(over(Department),\n\tasc(Salary, true),\n\tDenseRank = denseRank()) ~> WindowTransformation"
+		}
+	}
+}
