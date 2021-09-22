@@ -12,16 +12,21 @@
 					"name": "EmpUpdatescsv"
 				}
 			],
-			"sinks": [],
-			"transformations": [
+			"sinks": [
 				{
-					"name": "ColumnRearrange"
-				},
-				{
-					"name": "WindowTransformation"
+					"dataset": {
+						"referenceName": "WindowtransformationOutput",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
 				}
 			],
-			"script": "source(output(\n\t\tempid as string,\n\t\t{name } as string,\n\t\tcountry as string,\n\t\tdepartment as string,\n\t\tsalary as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> EmpUpdatescsv\nEmpUpdatescsv select(mapColumn(\n\t\tEmpid = empid,\n\t\t{Name } = {name },\n\t\tDepartment = department,\n\t\tSalary = salary,\n\t\tCountry = country\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ColumnRearrange\nColumnRearrange window(over(Department),\n\tasc(Salary, true),\n\tDenseRank = denseRank()) ~> WindowTransformation"
+			"transformations": [
+				{
+					"name": "Window1"
+				}
+			],
+			"script": "source(output(\n\t\tempid as integer,\n\t\t{name } as string,\n\t\tcountry as string,\n\t\tdepartment as string,\n\t\tsalary as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> EmpUpdatescsv\nEmpUpdatescsv window(over(department),\n\tasc(salary, true),\n\tAvgSalary = avg(salary)) ~> Window1\nWindow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tcountry as string,\n\t\tcountry_code_2_digit as string,\n\t\tcountry_code_3_digit as string,\n\t\tcontinent as string,\n\t\tpopulation as string\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
 		}
 	}
 }

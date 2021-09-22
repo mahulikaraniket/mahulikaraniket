@@ -1,0 +1,42 @@
+{
+	"name": "DoesNotExistsTransformation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Employeescsv",
+						"type": "DatasetReference"
+					},
+					"name": "Employees"
+				},
+				{
+					"dataset": {
+						"referenceName": "Deptcsv",
+						"type": "DatasetReference"
+					},
+					"name": "Deptcsv"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DoesNotExistTransformation",
+						"type": "DatasetReference"
+					},
+					"name": "sink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DoesNotExists"
+				},
+				{
+					"name": "Sort"
+				}
+			],
+			"script": "source(output(\n\t\tempid as string,\n\t\t{name } as string,\n\t\tcountry as string,\n\t\tdepartment as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Employees\nsource(output(\n\t\tdeptid as string,\n\t\tdepname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Deptcsv\nEmployees, Deptcsv exists(department == deptid,\n\tnegate:true,\n\tbroadcast: 'auto')~> DoesNotExists\nDoesNotExists sort(asc(department, true)) ~> Sort\nSort sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tcountry as string,\n\t\tcountry_code_2_digit as string,\n\t\tcountry_code_3_digit as string,\n\t\tcontinent as string,\n\t\tpopulation as string\n\t),\n\tpartitionFileNames:['ExistsTranformationoutput'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> sink"
+		}
+	}
+}
