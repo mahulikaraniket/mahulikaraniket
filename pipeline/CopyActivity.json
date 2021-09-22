@@ -24,6 +24,7 @@
 					],
 					"storeSettings": {
 						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
@@ -125,13 +126,13 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "CopyActivityInput1",
+									"referenceName": "DelimitedText2",
 									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "CopyActivityOutput",
+									"referenceName": "DelimitedText3",
 									"type": "DatasetReference"
 								}
 							]
