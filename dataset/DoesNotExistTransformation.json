@@ -1,5 +1,5 @@
 {
-	"name": "Deptcsv",
+	"name": "DoesNotExistTransformation",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorage2",
@@ -10,8 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "dept.csv",
-				"folderPath": "Input",
+				"folderPath": "Output",
 				"container": "demo"
 			},
 			"columnDelimiter": ",",
@@ -21,11 +20,23 @@
 		},
 		"schema": [
 			{
-				"name": "deptid",
+				"name": "country",
 				"type": "String"
 			},
 			{
-				"name": "depname",
+				"name": "country_code_2_digit",
+				"type": "String"
+			},
+			{
+				"name": "country_code_3_digit",
+				"type": "String"
+			},
+			{
+				"name": "continent",
+				"type": "String"
+			},
+			{
+				"name": "population",
 				"type": "String"
 			}
 		]

@@ -1,5 +1,5 @@
 {
-	"name": "Deptcsv",
+	"name": "CopyActivityInput",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorage2",
@@ -10,7 +10,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "dept.csv",
 				"folderPath": "Input",
 				"container": "demo"
 			},
@@ -21,11 +20,19 @@
 		},
 		"schema": [
 			{
-				"name": "deptid",
+				"name": "CustomerID",
 				"type": "String"
 			},
 			{
-				"name": "depname",
+				"name": "Fname",
+				"type": "String"
+			},
+			{
+				"name": "Lname",
+				"type": "String"
+			},
+			{
+				"name": "Region",
 				"type": "String"
 			}
 		]
